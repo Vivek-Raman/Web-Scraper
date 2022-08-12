@@ -15,12 +15,12 @@ const findItemsInType = async (browser, baseURL, itemType) => {
   rowElements.forEach(rowElement => {
     itemDataPromises.push(rowElement.evaluate(element => {
       const itemIDCell = element.children[2];
-      const imageCell = element.children[0];
       const titleCell = element.children[1];
+      const imageCell = element.children[0];
 
       const itemID = itemIDCell.getElementsByTagName('span')[0].innerText;
-      const imageSrc = imageCell.children[0].children[0].getAttribute('href');
       const title = titleCell.children[0].innerHTML;
+      const imageSrc = imageCell.children[0].children[0].getAttribute('href');
 
       return {
         itemID,
@@ -35,11 +35,5 @@ const findItemsInType = async (browser, baseURL, itemType) => {
   await page.close();
   return itemData;
 };
-
-/**
- * @param { HTMLElement } rowElement
- */
-const extractRowInfo = (rowElement) => {
-}
 
 export default findItemsInType;
