@@ -1,8 +1,10 @@
 /**
- * @param { import('puppeteer').Browser } browser 
+ * @param { import('puppeteer').Browser } browser
+ * @param { string } baseURL
+ * @returns { Promise<string[]> }
  */
-const findListOfTypes = async (browser) => {
-  const url = 'https://minecraftitemids.com/types';
+const findListOfTypes = async (browser, baseURL) => {
+  const url = baseURL + '/types';
 
   const page = (await browser.pages())[0];
   await page.goto(url, {
@@ -19,6 +21,7 @@ const findListOfTypes = async (browser) => {
   });
 
   const links = await Promise.all(promises);
+  console.log('Obtained type links:', links);
   return links;
 };
 
