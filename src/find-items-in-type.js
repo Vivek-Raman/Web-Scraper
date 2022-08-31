@@ -3,7 +3,9 @@ import fetch from "node-fetch";
 /**
  * 
  * @param { import('puppeteer').Browser } browser 
+ * @param { string } baseURL
  * @param { string } itemType
+ * @param { string[] } itemTypeBlacklist
  */
 const findItemsInType = async (browser, baseURL, itemType, itemTypeBlacklist) => {
   if (itemTypeBlacklist.indexOf(itemType) >= 0) {
@@ -37,17 +39,17 @@ const findItemsInType = async (browser, baseURL, itemType, itemTypeBlacklist) =>
           const titleCell = element.children[1];
           const imageCell = element.children[0];
 
-          const itemID = itemIDCell.getElementsByTagName('span')[0].innerText;
-          const title = titleCell.children[0].innerHTML;
-          const imageSrc = imageCell.children[0].children[0].getAttribute('href');
+          const itemID = itemIDCell.getElementsByTagName('span')[0].innerText.trim();
+          const title = titleCell.children[0].innerHTML.trim();
+          const imageSrc = imageCell.children[0].children[0].getAttribute('src')?.trim();
           return {
             itemID,
             title,
             imageSrc,
           };
-        }));
+        }).catch(e => console.error('Error in', url, ':', e)));
       });
-      const pageData = await Promise.allSettled(itemDataPromises);
+      const pageData = await Promise.all(itemDataPromises);
       itemData.push(...pageData);
 
       console.log('Extracted data from page', itemType + getPagePath(pageNumber), ':', pageData.length);
