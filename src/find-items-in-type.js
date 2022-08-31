@@ -1,3 +1,5 @@
+import fetch from "node-fetch";
+
 /**
  * 
  * @param { import('puppeteer').Browser } browser 
@@ -9,20 +11,22 @@ const findItemsInType = async (browser, baseURL, itemType, itemTypeBlacklist) =>
     return;
   }
 
-  console.log('Start extracting data from page', itemType);
+  console.log('Start extracting data from type', itemType);
+  const itemData = [];
+  let pageNumber = 1;
   try {
     const page = await browser.newPage();
     do {
-      let pageNumber = 1;
       const url = baseURL + itemType + getPagePath(pageNumber);
-      
+
       const shouldGotoNextPage = await fetch(url, {redirect:'manual'})
           .then(res => res.status !== 301);
-      if (!shouldGotoNextPage) return;
+      if (!shouldGotoNextPage) return itemData;
 
+      console.log('Extracting data from page', itemType + getPagePath(pageNumber));
       await page.goto(url, {
         timeout: 0,
-        // TODO: waitUntil?
+        waitUntil: 'domcontentloaded',
       });
 
       const rowElements = await page.$$('tr.rd-filter__search-item');
@@ -43,17 +47,19 @@ const findItemsInType = async (browser, baseURL, itemType, itemTypeBlacklist) =>
           };
         }));
       });
-      const itemData = await Promise.allSettled(itemDataPromises);
+      const pageData = await Promise.allSettled(itemDataPromises);
+      itemData.push(...pageData);
 
-      console.log('Extracted data from type', itemType + '/' + pageNumber, ':', itemData.length);
-      rowElements.forEach(re => re.dispose());
+      console.log('Extracted data from page', itemType + getPagePath(pageNumber), ':', pageData.length);
+      rowElements.forEach(async (res) => { await res.dispose() });
 
-    } while (0);
+      pageNumber++;
+    } while (pageNumber < 10);
 
     await page.close();
     return itemData;
   } catch (err) {
-    console.error('Error fetching data from page', itemType, 'error: ', err);
+    console.error('Error fetching data from page', itemType + getPagePath(pageNumber), 'error: ', err);
   }
   return;
 };
@@ -62,7 +68,7 @@ const getPagePath = (pageNumber) => {
   if (pageNumber === 1) {
     return '';
   } else if (pageNumber > 1) {
-    return '/' + Number.toString(pageNumber);
+    return '/' + pageNumber;
   }
 }
 

@@ -9,7 +9,7 @@ const itemTypeBlacklist = ['/types/spawn-egg', '/types/spawner',];
 const filePath = path.resolve('./out/data.json');
 
 const browser = await launch({
-  headless: false,
+  headless: true,
   devtools: true,
   args: ['--ignore-certificate-errors',
   '--disable-gpu',

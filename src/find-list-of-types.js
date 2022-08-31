@@ -9,6 +9,7 @@ const findListOfTypes = async (browser, baseURL) => {
   const page = (await browser.pages())[0];
   await page.goto(url, {
     timeout: 0,
+    waitUntil: 'domcontentloaded'
   });
 
   console.log('Navigated to', url);
