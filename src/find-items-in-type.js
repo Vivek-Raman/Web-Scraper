@@ -5,14 +5,8 @@ import fetch from "node-fetch";
  * @param { import('puppeteer').Browser } browser 
  * @param { string } baseURL
  * @param { string } itemType
- * @param { string[] } itemTypeBlacklist
  */
-const findItemsInType = async (browser, baseURL, itemType, itemTypeBlacklist) => {
-  if (itemTypeBlacklist.indexOf(itemType) >= 0) {
-    console.log('Skipping itemType', itemType);
-    return;
-  }
-
+const findItemsInType = async (browser, baseURL, itemType) => {
   console.log('Start extracting data from type', itemType);
   const itemData = [];
   let pageNumber = 1;
@@ -41,13 +35,40 @@ const findItemsInType = async (browser, baseURL, itemType, itemTypeBlacklist) =>
 
           const itemID = itemIDCell.getElementsByTagName('span')[0].innerText.trim();
           const title = titleCell.children[0].innerHTML.trim();
-          const imageSrc = imageCell.children[0].children[0].getAttribute('src')?.trim();
+
+          let imageSrc = '';
+          if (imageCell?.hasChildNodes()) {
+            imageSrc = imageCell.children[0].children[0].getAttribute('src')?.trim();
+          }
           return {
             itemID,
             title,
             imageSrc,
           };
-        }).catch(e => console.error('Error in', url, ':', e)));
+        }).catch(async (e) => {
+          await rowElement.evaluate((element) => {
+            const itemIDCell = element.children[2];
+            const titleCell = element.children[1];
+
+            const itemID = itemIDCell.getElementsByTagName('span')[0].innerText.trim();
+            const title = titleCell.children[0].innerHTML.trim();
+            const imageSrc = '';
+
+            return {
+              itemID,
+              title,
+              imageSrc,
+            };
+          });
+        }).catch(async (e) => {
+          console.error('Error in', url, 'rowElement',
+              await rowElement.evaluate(element => element.outerHTML), ':', e);
+          return {
+            itemID: '',
+            title: '',
+            imageSrc: '',
+          }
+        }));
       });
       const pageData = await Promise.all(itemDataPromises);
       itemData.push(...pageData);
@@ -59,7 +80,7 @@ const findItemsInType = async (browser, baseURL, itemType, itemTypeBlacklist) =>
     } while (pageNumber < 10);
 
     await page.close();
-    return itemData;
+    return itemData.filter(item => item !== null);
   } catch (err) {
     console.error('Error fetching data from page', itemType + getPagePath(pageNumber), 'error: ', err);
   }
