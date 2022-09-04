@@ -46,7 +46,7 @@ const findItemsInType = async (browser, baseURL, itemType) => {
             imageSrc,
           };
         }).catch(async (e) => {
-          await rowElement.evaluate((element) => {
+          return await rowElement.evaluate((element) => {
             const itemIDCell = element.children[2];
             const titleCell = element.children[1];
 
@@ -71,7 +71,7 @@ const findItemsInType = async (browser, baseURL, itemType) => {
         }));
       });
       const pageData = await Promise.all(itemDataPromises);
-      itemData.push(...pageData);
+      itemData.push(...pageData.filter(item => item !== null));
 
       console.log('Extracted data from page', itemType + getPagePath(pageNumber), ':', pageData.length);
       rowElements.forEach(async (res) => { await res.dispose() });
