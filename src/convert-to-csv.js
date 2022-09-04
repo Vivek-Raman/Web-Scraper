@@ -29,7 +29,13 @@ const convertToCSV = async (baseURL, itemToTypeMap, excelFile) => {
            * @param { import("./types/Entry").Entry } item 
            * @returns { string }
            */
-          value: item => baseURL.concat(item.imageSrc),
+          value: item => {
+            if (item.imageSrc === '') {
+              return '';
+            } else {
+              return baseURL.concat(item.imageSrc);
+            }
+          },
         }
       ],
       content: entry[1],

@@ -1,7 +1,6 @@
 import fetch from "node-fetch";
 
 /**
- * 
  * @param { import('puppeteer').Browser } browser 
  * @param { string } baseURL
  * @param { string } itemType
