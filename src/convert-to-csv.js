@@ -1,10 +1,11 @@
 import xlsx from "json-as-xlsx";
 
 /**
+ * @param { string } baseURL
  * @param { {string?: import("./types/Entry").Entry[]} } itemToTypeMap
  * @param { string } excelFile
  */
-const convertToCSV = async (itemToTypeMap, excelFile) => {
+const convertToCSV = async (baseURL, itemToTypeMap, excelFile) => {
   /**
    * @type { import("json-as-xlsx").IJsonSheet[] } workbookData
    */
@@ -15,8 +16,20 @@ const convertToCSV = async (itemToTypeMap, excelFile) => {
       sheet: entry[0].split('/')[2],
       columns: [
         {
-          label: "title", 
+          label: "Item Name", 
           value: "title",
+        },
+        {
+          label: "Item ID",
+          value: "itemID",
+        },
+        {
+          label: "Image URL", 
+          /**
+           * @param { import("./types/Entry").Entry } item 
+           * @returns { string }
+           */
+          value: item => baseURL.concat(item.imageSrc),
         }
       ],
       content: entry[1],

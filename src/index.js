@@ -36,7 +36,7 @@ for (let i = 0; i < itemTypes.length; ++i) {
 
 await writeDataToFile(filePath, itemToTypeMap);
 
-await convertToCSV(itemToTypeMap, excelFile);
+await convertToCSV(baseURL, itemToTypeMap, excelFile);
 
 console.log('ALL DONE!');
 browser.close();
