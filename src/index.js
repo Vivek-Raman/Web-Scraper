@@ -1,12 +1,13 @@
 import findListOfTypes from './find-list-of-types.js';
 import findItemsInType from './find-items-in-type.js';
-import { launch } from 'puppeteer';
 import writeDataToFile from './write-data-to-file.js';
-import path from 'path';
+import convertToCSV from './convert-to-csv.js';
+import { launch } from 'puppeteer';
+import { resolve } from 'path';
 
 const baseURL = 'https://minecraftitemids.com';
-const itemTypeBlacklist = ['/types/spawn-egg', '/types/spawner',];
-const filePath = path.resolve('./out/data.json');
+const filePath = resolve('./out/data.json');
+const excelFile = resolve('./out/as-excel');
 
 const browser = await launch({
   headless: true,
@@ -22,15 +23,20 @@ const browser = await launch({
 
 const itemTypes = await findListOfTypes(browser, baseURL);
 
+/**
+ * @type { {string?: import("./types/Entry").Entry[]} }
+ */
 const itemToTypeMap = {};
 for (let i = 0; i < itemTypes.length; ++i) {
-  const itemsInType = await findItemsInType(browser, baseURL, itemTypes[i], itemTypeBlacklist);
+  const itemsInType = await findItemsInType(browser, baseURL, itemTypes[i]);
   if (itemsInType !== undefined) {
     itemToTypeMap[itemTypes[i]] = itemsInType;
   }
 }
 
 await writeDataToFile(filePath, itemToTypeMap);
+
+await convertToCSV(itemToTypeMap, excelFile);
 
 console.log('ALL DONE!');
 browser.close();
